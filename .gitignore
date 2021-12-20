@@ -2,7 +2,10 @@
 __pycache__/
 *.py[cod]
 *$py.class
-
+.env
+primer.json
+zadanie.json
+zadanie2.json
 # C extensions
 *.so
 
