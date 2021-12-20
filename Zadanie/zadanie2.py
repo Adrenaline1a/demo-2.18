@@ -2,7 +2,7 @@
 # -*- coding: utf-8 -*-
 
 
-import argparse
+import click
 import json
 import os
 import sys
@@ -54,7 +54,7 @@ def table(line, flights):
     print(line)
 
 
-def adding(flights, stay, number, value):
+def adding(flights, stay, number, value, file_name):
     flights.append(
         {
             'stay': stay,
@@ -62,6 +62,8 @@ def adding(flights, stay, number, value):
             'value': value
         }
     )
+    with open(file_name, "w", encoding="utf-8") as file_out:
+        json.dump(flights, file_out, ensure_ascii=False, indent=4)
     return flights
 
 
@@ -75,91 +77,39 @@ def opening(file_name):
         return json.load(f_in)
 
 
-def main(command_line=None):
-    file_parser = argparse.ArgumentParser(add_help=False)
-    file_parser.add_argument(
-        "-d",
-        "--data",
-        action="store",
-        required=False,
-        help="The data file name"
-    )
-    parser = argparse.ArgumentParser("flights")
-    parser.add_argument(
-        "--version",
-        action="version",
-        version="%(prog)s 0.1.0"
-    )
-    subparsers = parser.add_subparsers(dest="command")
-    add = subparsers.add_parser(
-        "add",
-        parents=[file_parser],
-        help="Add a new worker"
-    )
-    add.add_argument(
-        "-s",
-        "--stay",
-        action="store",
-        required=True,
-        help="The place"
-    )
-    add.add_argument(
-        "-v",
-        "--value",
-        action="store",
-        required=True,
-        help="The name"
-    )
-    add.add_argument(
-        "-n",
-        "--number",
-        action="store",
-        required=True,
-        help="The number"
-    )
-    _ = subparsers.add_parser(
-        "display",
-        parents=[file_parser],
-        help="Display all workers"
-    )
-    select = subparsers.add_parser(
-        "select",
-        parents=[file_parser],
-        help="Select the workers"
-    )
-    select.add_argument(
-        "-t",
-        "--type",
-        action="store",
-        required=True,
-        help="The required place"
-    )
-    args = parser.parse_args(command_line)
-    load_dotenv()
-    dotenv_path = os.getenv("WORKERS_DATA")
-    if not dotenv_path:
-        print("Такой переменной нет", file=sys.stderr)
-        sys.exit(1)
-    is_dirty = False
-    if os.path.exists(dotenv_path):
-        flights = opening(dotenv_path)
+@click.command()
+@click.option("-c", "--command")
+@click.option("-d", "--data")
+@click.option("-s", "--stay")
+@click.option("-v", "--value")
+@click.option("-n", "--number")
+@click.option("-t", "--typing")
+def main(command, data, stay, value, number, typing):
+    if os.path.exists(data):
+        load_dotenv()
+        dotenv_path = os.getenv("WORKERS_DATA")
+        if not dotenv_path:
+            click.secho('Такого файла нет', fg='red')
+            sys.exit(1)
+        if os.path.exists(dotenv_path):
+            flights = opening(dotenv_path)
+        else:
+            flights = []
+        line = '+-{}-+-{}-+-{}-+-{}-+'.format(
+            '-' * 4,
+            '-' * 20,
+            '-' * 15,
+            '-' * 16
+        )
+        if command == 'add':
+            adding(flights, stay, number, value, dotenv_path)
+            click.secho('Рейс добавлен', fg='green')
+        elif command == 'display':
+            table(line, flights)
+        elif command == 'select':
+            selecting(line, flights, typing)
     else:
-        flights = []
-    line = '+-{}-+-{}-+-{}-+-{}-+'.format(
-        '-' * 4,
-        '-' * 20,
-        '-' * 15,
-        '-' * 16
-    )
-    if args.command == "add":
-        flights = adding(flights, args.stay, args.number, args.value)
-        is_dirty = True
-    elif args.command == 'display':
-        table(line, flights)
-    elif args.command == "select":
-        selecting(line, flights, args.type)
-    if is_dirty:
-        saving(dotenv_path, flights)
+        click.secho('Такого файла нет', fg='red')
 
 
 if __name__ == '__main__':
