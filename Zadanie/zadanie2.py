@@ -67,11 +67,6 @@ def adding(flights, stay, number, value, file_name):
     return flights
 
 
-def saving(file_name, flights):
-    with open(file_name, "w", encoding="utf-8") as file_out:
-        json.dump(flights, file_out, ensure_ascii=False, indent=4)
-
-
 def opening(file_name):
     with open(file_name, "r", encoding="utf-8") as f_in:
         return json.load(f_in)
