@@ -50,65 +50,83 @@ def adding(data, stay, number, value):
 @cli.command()
 @click.argument('filename')
 def table(filename):
-    flights = opening(filename)
-    line = '+-{}-+-{}-+-{}-+-{}-+'.format(
-        '-' * 4,
-        '-' * 20,
-        '-' * 15,
-        '-' * 16
-    )
-    """Вывод скиска рейсов"""
-    print(line)
-    print(
-        '| {:^4} | {:^20} | {:^15} | {:^16} |'.format(
-            "№",
-            "Место прибытия",
-            "Номер самолёта",
-            "Тип"))
-    print(line)
-    for i, num in enumerate(flights, 1):
-        print(
-            '| {:<4} | {:<20} | {:<15} | {:<16} |'.format(
-                i,
-                num.get('stay', ''),
-                num.get('number', ''),
-                num.get('value', 0)
-            )
+    if os.path.exists(filename):
+        load_dotenv()
+        dotenv_path = os.getenv("WORKERS_DATA")
+        if not dotenv_path:
+            click.secho('Такого файла нет', fg='red')
+            sys.exit(1)
+        if os.path.exists(dotenv_path):
+            flights = opening(dotenv_path)
+        else:
+            flights = []
+        line = '+-{}-+-{}-+-{}-+-{}-+'.format(
+            '-' * 4,
+            '-' * 20,
+            '-' * 15,
+            '-' * 16
         )
-    print(line)
+        """Вывод скиска рейсов"""
+        print(line)
+        print(
+            '| {:^4} | {:^20} | {:^15} | {:^16} |'.format(
+                "№",
+                "Место прибытия",
+                "Номер самолёта",
+                "Тип"))
+        print(line)
+        for i, num in enumerate(flights, 1):
+            print(
+                '| {:<4} | {:<20} | {:<15} | {:<16} |'.format(
+                    i,
+                    num.get('stay', ''),
+                    num.get('number', ''),
+                    num.get('value', 0)
+                )
+            )
+        print(line)
 
 
 @cli.command()
 @click.argument('filename')
 @click.option("-t", "--typing")
 def selecting(filename, typing):
-    flights = opening(filename)
-    line = '+-{}-+-{}-+-{}-+-{}-+'.format(
-        '-' * 4,
-        '-' * 20,
-        '-' * 15,
-        '-' * 16
-    )
-    """Выбор рейсов по типу самолёта"""
-    count = 0
-    print(line)
-    print(
-        '| {:^4} | {:^20} | {:^15} | {:^16} |'.format(
-            "№",
-            "Место прибытия",
-            "Номер самолёта",
-            "Тип"))
-    print(line)
-    for i, num in enumerate(flights, 1):
-        if typing == num.get('value', ''):
-            count += 1
-            print(
-                '| {:<4} | {:<20} | {:<15} | {:<16} |'.format(
-                    count,
-                    num.get('stay', ''),
-                    num.get('number', ''),
-                    num.get('value', 0)))
-    print(line)
+    if os.path.exists(filename):
+        load_dotenv()
+        dotenv_path = os.getenv("WORKERS_DATA")
+        if not dotenv_path:
+            click.secho('Такого файла нет', fg='red')
+            sys.exit(1)
+        if os.path.exists(dotenv_path):
+            flights = opening(dotenv_path)
+        else:
+            flights = []
+        line = '+-{}-+-{}-+-{}-+-{}-+'.format(
+            '-' * 4,
+            '-' * 20,
+            '-' * 15,
+            '-' * 16
+        )
+        """Выбор рейсов по типу самолёта"""
+        count = 0
+        print(line)
+        print(
+            '| {:^4} | {:^20} | {:^15} | {:^16} |'.format(
+                "№",
+                "Место прибытия",
+                "Номер самолёта",
+                "Тип"))
+        print(line)
+        for i, num in enumerate(flights, 1):
+            if typing == num.get('value', ''):
+                count += 1
+                print(
+                    '| {:<4} | {:<20} | {:<15} | {:<16} |'.format(
+                        count,
+                        num.get('stay', ''),
+                        num.get('number', ''),
+                        num.get('value', 0)))
+        print(line)
 
 
 def opening(filename):
